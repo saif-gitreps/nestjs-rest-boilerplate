@@ -43,8 +43,7 @@ export class AuthService {
         },
       });
 
-      const { hash, ...user } = userFromDb; // eslint-disable-line @typescript-eslint/no-unused-vars
-      return user;
+      return this.signToken(userFromDb.id, userFromDb.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
@@ -55,15 +54,19 @@ export class AuthService {
     }
   }
 
-  async signToken(userId: number, email: string): Promise<string> {
+  async signToken(userId: number, email: string): Promise<{}> {
     const payload = {
       sub: userId,
       email,
     };
 
-    return this.jwt.signAsync(payload, {
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: "15m",
       secret: "secret",
     });
+
+    return {
+      access_token: token,
+    };
   }
 }
